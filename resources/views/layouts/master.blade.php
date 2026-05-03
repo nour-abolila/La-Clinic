@@ -221,12 +221,40 @@
             <nav class="main-menu d-flex navbar navbar-expand-lg ">
 
                 <div class="d-flex d-lg-none align-items-end mt-3">
-                    <ul class="d-flex justify-content-end list-unstyled m-0">
-                        <li>
-                            <a href="account.html" class="mx-3">
-                                <iconify-icon icon="healthicons:person" class="fs-4"></iconify-icon>
-                            </a>
-                        </li>
+                    <ul class="d-flex justify-content-end list-unstyled m-0 align-items-center">
+                        {{-- Auth: Login/Register or User Dropdown --}}
+                        @guest
+                            <li>
+                                <a href="{{ route('login') }}" class="mx-2 nav-link d-inline">
+                                    <iconify-icon icon="mdi:login" class="fs-5 me-1"></iconify-icon>Login
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('register') }}" class="mx-2 nav-link d-inline">
+                                    <iconify-icon icon="mdi:account-plus" class="fs-5 me-1"></iconify-icon>Register
+                                </a>
+                            </li>
+                        @else
+                            <li class="dropdown">
+                                <a href="#" class="mx-3 dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <iconify-icon icon="healthicons:person" class="fs-4"></iconify-icon>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li class="dropdown-item-text fw-bold text-muted px-3 py-1">
+                                        {{ Auth::user()->name }}
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><iconify-icon icon="mdi:account-circle" class="me-2"></iconify-icon>Profile</a></li>
+                                    <li>
+                                        <form method="POST" action="{{ route('logout') }}">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item"><iconify-icon icon="mdi:logout" class="me-2"></iconify-icon>Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endguest
+                        {{-- End Auth --}}
                         <li>
                             <a href="wishlist.html" class="mx-3">
                                 <iconify-icon icon="mdi:heart" class="fs-4"></iconify-icon>
@@ -245,7 +273,6 @@
                             <a href="#" class="mx-3" data-bs-toggle="offcanvas"
                                 data-bs-target="#offcanvasSearch" aria-controls="offcanvasSearch">
                                 <iconify-icon icon="tabler:search" class="fs-4"></iconify-icon>
-                                </span>
                             </a>
                         </li>
                     </ul>
@@ -301,20 +328,48 @@
                         </ul>
 
                         <div class="d-none d-lg-flex align-items-end">
-                            <ul class="d-flex justify-content-end list-unstyled m-0">
+                            <ul class="d-flex justify-content-end list-unstyled m-0 align-items-center">
+                                {{-- Auth: Login/Register or User Dropdown --}}
+                                @guest
+                                    <li>
+                                        <a href="{{ route('login') }}" class="mx-2 nav-link d-inline">
+                                            <iconify-icon icon="mdi:login" class="fs-5 me-1"></iconify-icon>Login
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('register') }}" class="mx-2 nav-link d-inline">
+                                            <iconify-icon icon="mdi:account-plus" class="fs-5 me-1"></iconify-icon>Register
+                                        </a>
+                                    </li>
+                                @else
+                                    <li class="dropdown">
+                                        <a href="#" class="mx-3 dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <iconify-icon icon="healthicons:person" class="fs-4"></iconify-icon>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li class="dropdown-item-text fw-bold text-muted px-3 py-1">
+                                                {{ Auth::user()->name }}
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><iconify-icon icon="mdi:account-circle" class="me-2"></iconify-icon>Profile</a></li>
+                                            <li>
+                                                <form method="POST" action="{{ route('logout') }}">
+                                                    @csrf
+                                                    <button type="submit" class="dropdown-item"><iconify-icon icon="mdi:logout" class="me-2"></iconify-icon>Logout</button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                @endguest
+                                {{-- End Auth --}}
                                 <li>
-                                    <a href="index.html" class="mx-3">
-                                        <iconify-icon icon="healthicons:person" class="fs-4"></iconify-icon>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="index.html" class="mx-3">
+                                    <a href="#" class="mx-3">
                                         <iconify-icon icon="mdi:heart" class="fs-4"></iconify-icon>
                                     </a>
                                 </li>
 
                                 <li class="">
-                                    <a href="index.html" class="mx-3" data-bs-toggle="offcanvas"
+                                    <a href="#" class="mx-3" data-bs-toggle="offcanvas"
                                         data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
                                         <iconify-icon icon="mdi:cart" class="fs-4 position-relative"></iconify-icon>
                                         <span
