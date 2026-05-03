@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Review;
 use Illuminate\Http\Request;
 
 class AnimalsProductsController extends Controller
@@ -25,7 +26,8 @@ class AnimalsProductsController extends Controller
             $query->where('name' , 'dog');
         })->get();
         $categories = Category::all();
-        return view('dog_shop' , compact('categories' , 'dogproducts'));
+        $reviews = Review::latest()->take(5)->get();
+        return view('dog_shop' , compact('categories' , 'dogproducts' , 'reviews'));
 
     }
 }

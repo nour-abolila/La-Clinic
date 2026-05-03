@@ -325,6 +325,9 @@
                             <li class="nav-item">
                                 <a href="index.html" class="nav-link">Contact</a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('reviews.create') }}" class="nav-link">Add Review</a>
+                            </li>
                         </ul>
 
                         <div class="d-none d-lg-flex align-items-end">
@@ -513,6 +516,7 @@
                     <div class="swiper testimonial-swiper">
                         <div class="swiper-wrapper">
                             {{-- section one --}}
+                            @foreach ($reviews as $review)
                             <div class="swiper-slide">
                                 <div class="row ">
                                     <div class="col-2">
@@ -520,32 +524,12 @@
                                             class="quote-icon text-primary"></iconify-icon>
                                     </div>
                                     <div class="col-md-10 mt-md-5 p-5 pt-0 pt-md-5">
-                                        <p class="testimonial-content fs-2">At the core of our practice is the idea
-                                            that
-                                            cities are the
-                                            incubators of our
-                                            greatest achievements, and the best hope for a sustainable future.</p>
-                                        <p class="text-black">- Joshima Lin</p>
+                                        <p class="testimonial-content fs-2">{{ $review->review_text }}</p>
+                                        <p class="text-black">- {{ $review->name }}</p>
                                     </div>
                                 </div>
                             </div>
-                            {{-- section two --}}
-                            <div class="swiper-slide">
-                                <div class="row ">
-                                    <div class="col-2">
-                                        <iconify-icon icon="ri:double-quotes-l"
-                                            class="quote-icon text-primary"></iconify-icon>
-                                    </div>
-                                    <div class="col-md-10 mt-md-5 p-5 pt-0 pt-md-5">
-                                        <p class="testimonial-content fs-2">At the core of our practice is the idea
-                                            that
-                                            cities are the
-                                            incubators of our
-                                            greatest achievements, and the best hope for a sustainable future.</p>
-                                        <p class="text-black">- Joshima Lin</p>
-                                    </div>
-                                </div>
-                            </div>
+                            @endforeach                           
                         </div>
                         <div class="swiper-pagination"></div>
                     </div>
