@@ -26,8 +26,7 @@ class AnimalsProductsController extends Controller
             $query->where('name' , 'dog');
         })->get();
         $categories = Category::all();
-        $reviews = Review::latest()->take(5)->get();
-        return view('dog_shop' , compact('categories' , 'dogproducts' , 'reviews'));
+        return view('dog_shop' , compact('categories' , 'dogproducts'));
 
     }
 }
