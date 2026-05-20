@@ -107,41 +107,27 @@
         <div class="offcanvas-header justify-content-center">
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body">
-            <div class="order-md-last">
-                <h4 class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-primary">Your cart</span>
-                    <span class="badge bg-primary rounded-circle pt-2">3</span>
-                </h4>
-                <ul class="list-group mb-3">
-                    <li class="list-group-item d-flex justify-content-between lh-sm">
-                        <div>
-                            <h6 class="my-0">Grey Hoodie</h6>
-                            <small class="text-body-secondary">Brief description</small>
-                        </div>
-                        <span class="text-body-secondary">$12</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between lh-sm">
-                        <div>
-                            <h6 class="my-0">Dog Food</h6>
-                            <small class="text-body-secondary">Brief description</small>
-                        </div>
-                        <span class="text-body-secondary">$8</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between lh-sm">
-                        <div>
-                            <h6 class="my-0">Soft Toy</h6>
-                            <small class="text-body-secondary">Brief description</small>
-                        </div>
-                        <span class="text-body-secondary">$5</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span class="fw-bold">Total (USD)</span>
-                        <strong>$20</strong>
-                    </li>
-                </ul>
-                <button class="w-100 btn btn-primary btn-lg" type="submit">Continue to checkout</button>
-            </div>
+        <div class="offcanvas-body" id="offcanvas-cart-body">
+            @auth
+                <div class="order-md-last">
+                    <h4 class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-primary">Your cart</span>
+                        <span class="badge bg-primary rounded-circle pt-2 cart-count-badge">{{ sprintf('%02d', $cartCount ?? 0) }}</span>
+                    </h4>
+                    <div id="offcanvas-cart-items">
+                        @include('cart.partials.offcanvas_items', [
+                            'cartItems' => Auth::user()->cartItems()->with('product')->get(),
+                            'cartTotal' => Auth::user()->cartItems->sum(function($item) { return $item->product->price * $item->quantity; })
+                        ])
+                    </div>
+                </div>
+            @else
+                <div class="text-center py-5">
+                    <iconify-icon icon="mdi:login" class="display-1 text-muted"></iconify-icon>
+                    <p class="mt-3">Please login to view your cart.</p>
+                    <a href="{{ route('login') }}" class="btn btn-outline-primary" data-bs-dismiss="offcanvas">Login</a>
+                </div>
+            @endauth
         </div>
     </div>
     {{-- end cart view --}}
@@ -256,16 +242,19 @@
                         @endguest
                         {{-- End Auth --}}
                         <li>
-                            <a href="wishlist.html" class="mx-3">
-                                <iconify-icon icon="mdi:heart" class="fs-4"></iconify-icon>
+                            <a href="{{ route('wishlist.index') }}" class="mx-3">
+                                <iconify-icon icon="mdi:heart" class="fs-4 position-relative"></iconify-icon>
+                                <span id="wishlist-count-mobile" class="position-absolute translate-middle badge rounded-circle bg-primary pt-2">
+                                    {{ sprintf('%02d', $wishlistCount) }}
+                                </span>
                             </a>
                         </li>
                         <li>
                             <a href="#" class="mx-3" data-bs-toggle="offcanvas"
                                 data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
                                 <iconify-icon icon="mdi:cart" class="fs-4 position-relative"></iconify-icon>
-                                <span class="position-absolute translate-middle badge rounded-circle bg-primary pt-2">
-                                    03
+                                <span class="position-absolute translate-middle badge rounded-circle bg-primary pt-2 cart-count-badge">
+                                    {{ sprintf('%02d', $cartCount ?? 0) }}
                                 </span>
                             </a>
                         </li>
@@ -366,8 +355,11 @@
                                 @endguest
                                 {{-- End Auth --}}
                                 <li>
-                                    <a href="#" class="mx-3">
-                                        <iconify-icon icon="mdi:heart" class="fs-4"></iconify-icon>
+                                    <a href="{{ route('wishlist.index') }}" class="mx-3">
+                                        <iconify-icon icon="mdi:heart" class="fs-4 position-relative"></iconify-icon>
+                                        <span id="wishlist-count-desktop" class="position-absolute translate-middle badge rounded-circle bg-primary pt-2">
+                                            {{ sprintf('%02d', $wishlistCount) }}
+                                        </span>
                                     </a>
                                 </li>
 
@@ -376,8 +368,8 @@
                                         data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
                                         <iconify-icon icon="mdi:cart" class="fs-4 position-relative"></iconify-icon>
                                         <span
-                                            class="position-absolute translate-middle badge rounded-circle bg-primary pt-2">
-                                            03
+                                            class="position-absolute translate-middle badge rounded-circle bg-primary pt-2 cart-count-badge">
+                                            {{ sprintf('%02d', $cartCount ?? 0) }}
                                         </span>
                                     </a>
                                 </li>
@@ -833,6 +825,157 @@
     <script src="{{ asset('assets/js/script.js') }}"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     {{-- end js links --}}
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const wishlistBtns = document.querySelectorAll('.btn-wishlist-toggle');
 
+            wishlistBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productId = this.getAttribute('data-product-id');
+                    const url = `{{ url('/wishlist/toggle') }}/${productId}`;
+
+                    axios.post(url, {}, {
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(response => {
+                        const data = response.data;
+                        const count = data.count.toString().padStart(2, '0');
+                        
+                        document.getElementById('wishlist-count-mobile').innerText = count;
+                        document.getElementById('wishlist-count-desktop').innerText = count;
+
+                        if (data.status === 'added') {
+                            this.querySelector('iconify-icon').setAttribute('icon', 'fluent:heart-28-filled');
+                            this.classList.add('text-primary');
+                        } else {
+                            this.querySelector('iconify-icon').setAttribute('icon', 'fluent:heart-28-regular');
+                            this.classList.remove('text-primary');
+                        }
+                        
+                        alert(data.message);
+                    })
+                    .catch(error => {
+                        if (error.response && error.response.status === 401) {
+                            window.location.href = "{{ route('login') }}";
+                        } else {
+                            console.error(error);
+                            alert('An error occurred. Please try again.');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+        <script>
+            // Cart functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                // Add to Cart
+                document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const productId = this.getAttribute('data-product-id');
+                        const url = `{{ url('/cart/add') }}/${productId}`;
+                        
+                        axios.post(url, { quantity: 1 }, {
+                            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                        })
+                        .then(response => {
+                            if(response.data.success) {
+                                updateCartUI(response.data);
+                                
+                                // Show offcanvas automatically
+                                const offcanvasCart = new bootstrap.Offcanvas(document.getElementById('offcanvasCart'));
+                                offcanvasCart.show();
+                            }
+                        })
+                        .catch(error => {
+                            if (error.response && error.response.status === 401) {
+                                window.location.href = "{{ route('login') }}";
+                            } else {
+                                console.error(error);
+                                alert('Error adding to cart');
+                            }
+                        });
+                    });
+                });
+
+                // Update cart UI function
+                window.updateCartUI = function(data) {
+                    document.querySelectorAll('.cart-count-badge').forEach(el => {
+                        el.innerText = data.cartCount.toString().padStart(2, '0');
+                    });
+                    
+                    if(document.getElementById('offcanvas-cart-items')) {
+                        document.getElementById('offcanvas-cart-items').innerHTML = data.html;
+                    }
+                    
+                    if(document.querySelectorAll('.cart-page-total').length > 0) {
+                        document.querySelectorAll('.cart-page-total').forEach(el => {
+                            el.innerText = '$' + data.cartTotal;
+                        });
+                    }
+                }
+
+                // Delegate events for dynamically loaded content in offcanvas and cart page
+                document.body.addEventListener('click', function(e) {
+                    // Remove from cart
+                    if(e.target.closest('.remove-from-cart')) {
+                        const btn = e.target.closest('.remove-from-cart');
+                        const cartId = btn.getAttribute('data-cart-id');
+                        
+                        if(confirm('Remove this item from your cart?')) {
+                            axios.delete(`{{ url('/cart/remove') }}/${cartId}`, {
+                                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                            }).then(response => {
+                                if(response.data.success) {
+                                    updateCartUI(response.data);
+                                    // If we are on the cart page, remove the row
+                                    const tr = btn.closest('tr');
+                                    if(tr) tr.remove();
+                                    
+                                    if(response.data.cartCount == 0 && window.location.pathname == '/cart') {
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    // Update quantity
+                    if(e.target.closest('.update-cart-qty')) {
+                        const btn = e.target.closest('.update-cart-qty');
+                        const cartId = btn.getAttribute('data-cart-id');
+                        const action = btn.getAttribute('data-action');
+                        const input = document.querySelector(`.cart-qty-input[data-cart-id="${cartId}"]`) || btn.closest('.d-inline-flex').querySelector('input');
+                        
+                        let qty = parseInt(input.value);
+                        if(action === 'plus') qty++;
+                        else if(action === 'minus' && qty > 1) qty--;
+                        else return;
+
+                        input.value = qty;
+                        
+                        axios.patch(`{{ url('/cart/update') }}/${cartId}`, { quantity: qty }, {
+                            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                        }).then(response => {
+                            if(response.data.success) {
+                                // Update cart offcanvas & global UI
+                                updateCartUI(response.data.cartData);
+                                
+                                // Update subtotal on cart page
+                                const subtotalEl = document.querySelector(`.item-subtotal[data-cart-id="${cartId}"]`);
+                                if(subtotalEl) {
+                                    subtotalEl.innerText = '$' + response.data.itemSubtotal;
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+        </script>
+</body>
 </html>
