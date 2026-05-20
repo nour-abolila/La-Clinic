@@ -23,6 +23,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the cart items for the user.
+     */
+    public function cartItems(): HasMany
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    /**
+     * Get the products in the user's wishlist.
+     */
+    public function wishlistProducts()
+    {
+        return $this->belongsToMany(Product::class, 'wishlists')->withTimestamps();
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
