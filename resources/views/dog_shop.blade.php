@@ -55,11 +55,11 @@
                                     <h3 class="secondary-font text-primary">${{ number_format($product->price, 2) }}</h3>
 
                                     <div class="d-flex flex-wrap mt-3">
-                                        <a href="#" class="btn-cart me-3 px-4 pt-3 pb-3">
+                                        <a href="#" class="btn-cart btn-add-to-cart me-3 px-4 pt-3 pb-3" data-product-id="{{ $product->id }}">
                                             <h5 class="text-uppercase m-0">Add to Cart</h5>
                                         </a>
-                                        <a href="#" class="btn-wishlist px-4 pt-3 ">
-                                            <iconify-icon icon="fluent:heart-28-filled" class="fs-5"></iconify-icon>
+                                        <a href="#" class="btn-wishlist px-4 pt-3 btn-wishlist-toggle {{ Auth::check() && Auth::user()->wishlistProducts->contains($product->id) ? 'text-primary' : '' }}" data-product-id="{{ $product->id }}">
+                                            <iconify-icon icon="{{ Auth::check() && Auth::user()->wishlistProducts->contains($product->id) ? 'fluent:heart-28-filled' : 'fluent:heart-28-regular' }}" class="fs-5"></iconify-icon>
                                         </a>
                                     </div>
                                 </div>
