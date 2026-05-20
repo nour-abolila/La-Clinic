@@ -26,8 +26,7 @@ class HomeProductsController extends Controller
         })->get();
 
         $animals = Animal::all();
-        $reviews = Review::latest()->take(5)->get();
-        return view('welcome', compact('clothesproducts' ,'foodproducts', 'suppliesproducts', 'animals', 'reviews'));
+        return view('welcome', compact('clothesproducts' ,'foodproducts', 'suppliesproducts', 'animals'));
     }
 
 }
